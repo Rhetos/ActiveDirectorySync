@@ -36,34 +36,34 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
-      <HintPath>..\..\Source\Rhetos\bin\Autofac.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Autofac.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Configuration.Autofac">
-      <HintPath>..\..\Source\Rhetos\bin\Rhetos.Configuration.Autofac.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Rhetos.Configuration.Autofac.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Dom.DefaultConcepts">
-      <HintPath>..\..\Source\Rhetos\bin\Plugins\Rhetos.Dom.DefaultConcepts.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Plugins\Rhetos.Dom.DefaultConcepts.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Dom.DefaultConcepts.Interfaces">
-      <HintPath>..\..\Source\Rhetos\bin\Plugins\Rhetos.Dom.DefaultConcepts.Interfaces.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Plugins\Rhetos.Dom.DefaultConcepts.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Security.Interfaces">
-      <HintPath>..\..\Source\Rhetos\bin\Rhetos.Security.Interfaces.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Rhetos.Security.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.TestCommon">
-      <HintPath>..\..\Source\Rhetos.TestCommon\bin\Debug\Rhetos.TestCommon.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos.TestCommon\bin\Debug\Rhetos.TestCommon.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Utilities">
-      <HintPath>..\..\Source\Rhetos\bin\Rhetos.Utilities.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Rhetos.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="ServerDom.Model">
-      <HintPath>..\..\Source\Rhetos\bin\Generated\ServerDom.Model.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Generated\ServerDom.Model.dll</HintPath>
     </Reference>
     <Reference Include="ServerDom.Orm">
-      <HintPath>..\..\Source\Rhetos\bin\Generated\ServerDom.Orm.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Generated\ServerDom.Orm.dll</HintPath>
     </Reference>
     <Reference Include="ServerDom.Repositories">
-      <HintPath>..\..\Source\Rhetos\bin\Generated\ServerDom.Repositories.dll</HintPath>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Generated\ServerDom.Repositories.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>

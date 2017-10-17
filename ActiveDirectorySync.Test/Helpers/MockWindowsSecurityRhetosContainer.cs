@@ -46,16 +46,14 @@ namespace ActiveDirectorySync.Test.Helpers
         private static string GetRhetosServerFolder()
         {
             string start = Directory.GetCurrentDirectory();
-
-            string folder = start;
-            while (Path.GetFileName(folder) != "Rhetos")
+            string root = start;
+            while (Path.GetFileName(root) != "ActiveDirectorySync")
             {
-                folder = Path.GetDirectoryName(folder);
-                if (folder == null)
-                    throw new ApplicationException($"Cannot find the root 'Rhetos' source folder starting from '{start}'.");
+                root = Path.GetDirectoryName(root);
+                if (root == null)
+                    throw new ApplicationException($"Cannot find the root 'ActiveDirectorySync' source folder starting from '{start}'.");
             };
-
-            return Path.Combine(folder, @"Source\Rhetos");
+            return Path.Combine(root, @"..\..\Rhetos\Source\Rhetos");
         }
     }
 }

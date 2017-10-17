@@ -1,11 +1,7 @@
 # ActiveDirectorySync
 
-ActiveDirectorySync is a package (a plugin module) for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
+ActiveDirectorySync is a plugin package for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
 It synchronizes the Rhetos principals and roles with Active Directory by automatically adding or removing principal-role and role-role membership relations.
-
-## Installation
-
-* *CommonConcepts* packages must be deployed along with this package.
 
 ## Configuring Rhetos users and user groups
 
@@ -22,4 +18,23 @@ To set the users permissions, the following methods are available:
 3. Create a group of permissions and assign it to the user or user group:
     * Add a new `Common.Role` without domain name prefix (it will not be bound to the domain user group) that will serve as a permission group.
     * Set the role's permissions in `Common.RolePermission`.
-    * Assign the role to the user's group (insert in `Common.RoleInheritsRole`) or directly to the userm (insert in `Common.PrincipalHasRole`).
+    * Assign the role to the user's group (insert in `Common.RoleInheritsRole`) or directly to the user (insert in `Common.PrincipalHasRole`).
+
+## Build
+
+**Note:** This package is already available at the [NuGet.org](https://www.nuget.org/) online gallery.
+You don't need to build it from source in order to use it in your application.
+
+To build the package from source, run `Build.bat`.
+The script will pause in case of an error.
+The build output is a NuGet package in the "Install" subfolder.
+
+## Installation
+
+To install this package to a Rhetos server, add it to the Rhetos server's *RhetosPackages.config* file
+and make sure the NuGet package location is listed in the *RhetosPackageSources.config* file.
+
+* The package ID is "**Rhetos.ActiveDirectorySync**".
+  This package is available at the [NuGet.org](https://www.nuget.org/) online gallery.
+  It can be downloaded or installed directly from there.
+* For more information, see [Installing plugin packages](https://github.com/Rhetos/Rhetos/wiki/Installing-plugin-packages).
