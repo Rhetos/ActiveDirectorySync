@@ -172,6 +172,7 @@ namespace ActiveDirectorySync.Test
 
                 // Recompute membership on update principal (domain users only):
 
+                u2 = principals.Load(new[] { u2.ID }).Single(); // Refresh before modification.
                 u2.Name = "u2x";
                 principals.Update(u2);
                 Assert.AreEqual(@"\u1-\r1, u2x-\r2, u2x-r25, u5-r25", ReportMembership(container), "auto-membership on update ignore non-domain users");
