@@ -22,6 +22,7 @@ using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,7 +55,7 @@ namespace ActiveDirectorySync.Test.Helpers
             return _membership.Get(username).ToList();
         }
 
-        public bool IsBuiltInAdministrator(IWindowsUserInfo userInfo)
+        public bool IsBuiltInAdministrator(WindowsIdentity userInfo)
         {
             throw new NotImplementedException();
         }
