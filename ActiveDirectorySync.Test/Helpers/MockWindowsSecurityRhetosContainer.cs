@@ -21,6 +21,7 @@ using Autofac;
 using Rhetos.Configuration.Autofac;
 using Rhetos.Dom.DefaultConcepts;
 using Rhetos.Security;
+using Rhetos.TestCommon;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,9 +36,10 @@ namespace ActiveDirectorySync.Test.Helpers
         public MockWindowsSecurityRhetosContainer(string userGroupMembership, bool commitChanges = false)
             : base(commitChanges, GetRhetosServerFolder())
         {
+            Console.WriteLine($"TestSuffix: {TestSuffix}");
             InitializeSession += builder =>
             {
-                builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership)).As<IWindowsSecurity>();
+                builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership, TestSuffix)).As<IWindowsSecurity>();
                 // Test the CommonAuthorizationProvider even if another security package was deployed:
                 builder.RegisterType<CommonAuthorizationProvider>();
             };
@@ -52,8 +54,99 @@ namespace ActiveDirectorySync.Test.Helpers
                 root = Path.GetDirectoryName(root);
                 if (root == null)
                     throw new ApplicationException($"Cannot find the root 'ActiveDirectorySync' source folder starting from '{start}'.");
-            };
+            }
             return Path.Combine(root, @"..\..\Rhetos\Source\Rhetos");
+        }
+
+        public readonly string TestSuffix = "_" + Guid.NewGuid().ToString().Replace("-", "");
+
+        public readonly string DomainPrefix = Environment.UserDomainName + @"\";
+
+        /// <summary>
+        /// Creates a new principal with the current windows domain prefix (by default) and a random test context suffix.
+        /// </summary>
+        public Common.Principal NewPrincipal(string namePrefix, bool domain = true)
+        {
+            return new Common.Principal
+            {
+                ID = Guid.NewGuid(),
+                Name = NewName(namePrefix, domain)
+            };
+        }
+
+        /// <summary>
+        /// Creates a new role with the current windows domain prefix (by default) and a random test context suffix.
+        /// </summary>
+        public Common.Role NewRole(string namePrefix, bool domain = true)
+        {
+            return new Common.Role
+            {
+                ID = Guid.NewGuid(),
+                Name = NewName(namePrefix, domain)
+            };
+        }
+
+        public string NewName(string namePrefix, bool domain = true)
+        {
+            return (domain ? DomainPrefix : "") + namePrefix + TestSuffix;
+        }
+
+        /// <summary>Shortens and sorts the names.</summary>
+        public string ReportMembership(object filter = null)
+        {
+            var context = this.Resolve<Common.ExecutionContext>();
+            var membership = context.Repository.Common.PrincipalHasRole;
+            var query = filter == null ? membership.Query() : membership.Query(membership.Load(filter).Select(item => item.ID));
+            var reportData = query
+                .Where(phr => phr.Principal.Name.EndsWith(TestSuffix) && phr.Role.Name.EndsWith(TestSuffix))
+                .Select(phr => new { PrincipalName = phr.Principal.Name, RoleName = phr.Role.Name }).ToList();
+            string report = TestUtility.DumpSorted(reportData, phr => Shorten(phr.PrincipalName) + "-" + Shorten(phr.RoleName));
+            Console.WriteLine("[ReportMembership] " + report);
+            return report;
+        }
+
+        public string Shorten(string name)
+        {
+            name = name.StartsWith(DomainPrefix) ? name.Substring(DomainPrefix.Length - 1) : name;
+            return name.Replace(TestSuffix, "");
+        }
+
+        /// <summary>Shortens and sorts the names.</summary>
+        public string ReportPrincipals(IEnumerable<Common.Principal> principals)
+        {
+            return ReportPrincipals(principals
+                .Where(p => p.Name.EndsWith(TestSuffix))
+                .Select(p => p.Name));
+        }
+
+        /// <summary>Shortens and sorts the names.</summary>
+        private string ReportPrincipals(IEnumerable<string> domainPrincipalNames)
+        {
+            string report = string.Join(", ", domainPrincipalNames.Select(Shorten).OrderBy(name => name));
+            Console.WriteLine("[ReportPrincipals] " + report);
+            return report;
+        }
+
+        /// <summary>Shortens and sorts the names.</summary>
+        public string ReportRoles(IEnumerable<Common.Role> roles)
+        {
+            return ReportRoles(roles
+                .Where(r => r.Name.EndsWith(TestSuffix))
+                .Select(r => r.Name));
+        }
+
+        /// <summary>Shortens and sorts the names.</summary>
+        private string ReportRoles(IEnumerable<string> domainRoleNames)
+        {
+            string report = string.Join(", ", domainRoleNames.Select(Shorten).OrderBy(name => name));
+            Console.WriteLine("[ReportRoles] " + report);
+            return report;
+        }
+
+        public string ReportRoles(IEnumerable<Guid> roles)
+        {
+            var roleNames = this.Resolve<GenericRepository<Common.Role>>().Load().ToDictionary(r => r.ID, r => r.Name);
+            return ReportRoles(roles.Select(id => roleNames[id]));
         }
     }
 }

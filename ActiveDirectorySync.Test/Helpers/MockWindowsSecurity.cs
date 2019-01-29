@@ -30,11 +30,13 @@ namespace ActiveDirectorySync.Test.Helpers
 {
     public class MockWindowsSecurity : IWindowsSecurity
     {
-        string _userGroupMembership;
+        readonly string _userGroupMembership;
+        readonly string _testSuffix;
 
-        public MockWindowsSecurity(string userGroupMembership)
+        public MockWindowsSecurity(string userGroupMembership, string testSuffix)
         {
             _userGroupMembership = userGroupMembership;
+            _testSuffix = testSuffix;
         }
 
         public string GetClientWorkstation()
@@ -42,7 +44,7 @@ namespace ActiveDirectorySync.Test.Helpers
             throw new NotImplementedException();
         }
 
-        private static MultiDictionary<string, string> _membership = null;
+        private MultiDictionary<string, string> _membership = null;
 
         public IEnumerable<string> GetIdentityMembership(string username)
         {
@@ -50,7 +52,7 @@ namespace ActiveDirectorySync.Test.Helpers
             {
                 _membership = new MultiDictionary<string, string>();
                 foreach (var pair in _userGroupMembership.Split(' '))
-                    _membership.Add(System.Environment.UserDomainName + @"\" + pair.Split('-')[0], pair.Split('-')[1]);
+                    _membership.Add(Environment.UserDomainName + @"\" + pair.Split('-')[0] + _testSuffix, pair.Split('-')[1] + _testSuffix);
             }
             return _membership.Get(username).ToList();
         }
