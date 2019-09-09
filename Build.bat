@@ -2,11 +2,14 @@ SETLOCAL
 SET Version=2.0.0
 SET Prerelease=auto
 
+REM Updating the build version.
 PowerShell .\ChangeVersion.ps1 %Version% %Prerelease% || GOTO Error0
+
 WHERE /Q NuGet.exe || ECHO ERROR: Please download the NuGet.exe command line tool. && GOTO Error0
 IF NOT EXIST Install md Install
 NuGet pack -OutputDirectory Install || GOTO Error0
-REM Updating the version of all projects back to "dev" (internal development build), to avoid spamming git history with timestamped prerelease versions.
+
+REM Updating the build version back to "dev" (internal development build), to avoid spamming git history with timestamped prerelease versions.
 PowerShell .\ChangeVersion.ps1 %Version% dev || GOTO Error0
 
 @REM ================================================
