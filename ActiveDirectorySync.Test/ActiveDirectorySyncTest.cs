@@ -62,7 +62,7 @@ namespace ActiveDirectorySync.Test
                 var r25 = container.NewRole("r25", domain: false);
 
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
@@ -101,7 +101,7 @@ namespace ActiveDirectorySync.Test
                 var r25 = container.NewRole("r25", domain: false);
 
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
@@ -145,7 +145,7 @@ namespace ActiveDirectorySync.Test
 
                 var repository = container.Resolve<Common.DomRepository>();
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = repository.Common.PrincipalHasRole;
 
                 roles.Insert(r1, r2, r25);
@@ -182,7 +182,7 @@ namespace ActiveDirectorySync.Test
 
                 var repository = container.Resolve<Common.DomRepository>();
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = repository.Common.PrincipalHasRole;
 
                 roles.Insert(r1, r2);
@@ -220,7 +220,7 @@ namespace ActiveDirectorySync.Test
 
                 var repository = container.Resolve<Common.DomRepository>();
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = repository.Common.PrincipalHasRole;
 
                 roles.Insert(r1, r2, r25);
@@ -256,7 +256,7 @@ namespace ActiveDirectorySync.Test
                 var r25 = container.NewRole("r25", domain: false);
 
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
@@ -300,7 +300,7 @@ namespace ActiveDirectorySync.Test
 
                 var repository = container.Resolve<Common.DomRepository>();
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
@@ -337,7 +337,7 @@ namespace ActiveDirectorySync.Test
                 var r25 = container.NewRole("r25", domain: false);
 
                 var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<Common.Principal>>();
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
                 var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);

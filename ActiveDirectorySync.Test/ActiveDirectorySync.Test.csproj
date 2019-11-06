@@ -84,6 +84,7 @@
     <Compile Include="Helpers\MockWindowsSecurity.cs" />
     <Compile Include="Helpers\MockWindowsSecurityRhetosContainer.cs" />
     <Compile Include="ActiveDirectorySyncTest.cs" />
+    <Compile Include="Helpers\PrincipalHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

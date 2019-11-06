@@ -65,13 +65,12 @@ namespace ActiveDirectorySync.Test.Helpers
         /// <summary>
         /// Creates a new principal with the current windows domain prefix (by default) and a random test context suffix.
         /// </summary>
-        public Common.Principal NewPrincipal(string namePrefix, bool domain = true)
+        public IPrincipal NewPrincipal(string namePrefix, bool domain = true)
         {
-            return new Common.Principal
-            {
-                ID = Guid.NewGuid(),
-                Name = NewName(namePrefix, domain)
-            };
+            var principal = Resolve<Common.ExecutionContext>().GenericRepository<IPrincipal>("Common.Principal").CreateInstance();
+            principal.ID = Guid.NewGuid();
+            principal.Name = NewName(namePrefix, domain);
+            return principal;
         }
 
         /// <summary>
@@ -112,10 +111,10 @@ namespace ActiveDirectorySync.Test.Helpers
         }
 
         /// <summary>Shortens and sorts the names.</summary>
-        public string ReportPrincipals(IEnumerable<Common.Principal> principals)
+        public string ReportPrincipals(IEnumerable<IPrincipal> principals)
         {
             return ReportPrincipals(principals
-                .Where(p => p.Name.EndsWith(TestSuffix))
+                .Where(p => p.Name != null && p.Name.EndsWith(TestSuffix))
                 .Select(p => p.Name));
         }
 
@@ -127,7 +126,7 @@ namespace ActiveDirectorySync.Test.Helpers
             return report;
         }
 
-        /// <summary>Shortens and sorts the names.</summary>
+        /// <summary>Shortens and sorts the names. Removes system roles.</summary>
         public string ReportRoles(IEnumerable<Common.Role> roles)
         {
             return ReportRoles(roles
@@ -135,14 +134,21 @@ namespace ActiveDirectorySync.Test.Helpers
                 .Select(r => r.Name));
         }
 
-        /// <summary>Shortens and sorts the names.</summary>
-        private string ReportRoles(IEnumerable<string> domainRoleNames)
+        /// <summary>Shortens and sorts the names. Removes system roles.</summary>
+        private string ReportRoles(IEnumerable<string> roleNames)
         {
-            string report = string.Join(", ", domainRoleNames.Select(Shorten).OrderBy(name => name));
+            var simplifiedRoleNames = roleNames
+                .Except(Enum.GetNames(typeof(SystemRole)))
+                .Select(Shorten)
+                .OrderBy(name => name)
+                .ToList();
+
+            string report = string.Join(", ", simplifiedRoleNames);
             Console.WriteLine("[ReportRoles] " + report);
             return report;
         }
 
+        /// <summary>Shortens and sorts the names. Removes system roles.</summary>
         public string ReportRoles(IEnumerable<Guid> roles)
         {
             var roleNames = this.Resolve<GenericRepository<Common.Role>>().Load().ToDictionary(r => r.ID, r => r.Name);
