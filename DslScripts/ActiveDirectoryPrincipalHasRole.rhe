@@ -5,7 +5,7 @@
 		Reference Principal;
         Reference Role;
 		
-		FilterBy 'Common.ActiveDirectoryUserParameter[]' '(repository, parameter, context) =>
+		FilterBy 'Common.ActiveDirectoryUserParameter[]' '(repository, parameter) =>
 			{
 				return parameter.Select(p => p.UserName).SelectMany(username =>
 					{
@@ -13,7 +13,7 @@
 						if (principalId == default(Guid))
 							return new ActiveDirectoryPrincipalHasRole[] { };
 							
-						List<string> userGroups = context.WindowsSecurity.GetIdentityMembership(username)
+						List<string> userGroups = _executionContext.WindowsSecurity.GetIdentityMembership(username)
 							.Select(domainGroup => Environment.UserDomainName + @"\" + domainGroup)
 							.ToList();
 
@@ -22,10 +22,7 @@
 							.Select(role => new ActiveDirectoryPrincipalHasRole { PrincipalID = principalId, RoleID = role.ID })
 							.ToArray();
 					}).ToArray();
-			}'
-		{
-			UseExecutionContext;
-		}
+			}';
 		
 		FilterBy 'Common.ActiveDirectoryAllUsersParameter' '(repository, parameter) =>
 			{
