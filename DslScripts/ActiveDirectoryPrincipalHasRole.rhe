@@ -74,7 +74,11 @@
 			'{
 				string domainPrefix = Environment.UserDomainName + @"\";
 				if (queryParameter.Name.StartsWithCaseInsensitive(domainPrefix))
+				{
+					string recomputeLock = $"EXEC sp_getapplock ''ActiveDirectorySync_PHR_{queryParameter.Name}'', ''Exclusive''";
+    				_executionContext.SqlExecuter.ExecuteSql(recomputeLock);
 					RecomputeFromActiveDirectoryPrincipalHasRole(new[] { new ActiveDirectoryUserParameter { UserName = queryParameter.Name } });
+				}
 			}';
 		
 		FilterBy 'Common.ActiveDirectoryUserParameter[]' '(repository, parameter) =>
