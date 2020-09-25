@@ -17,6 +17,7 @@
   </metadata>
   <files>
     <file src="Readme.md" target="" />
+    <file src="ChangeLog.md" target="" />
     <file src="DslScripts\**\*" target="DslScripts" />
   </files>
 </package>
