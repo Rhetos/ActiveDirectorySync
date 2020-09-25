@@ -30,13 +30,13 @@ namespace ActiveDirectorySync.Test.Helpers
 {
     public class MockWindowsSecurity : IWindowsSecurity
     {
-        readonly string _userGroupMembership;
-        readonly string _testSuffix;
+        private readonly MultiDictionary<string, string> _membership;
 
         public MockWindowsSecurity(string userGroupMembership, string testSuffix)
         {
-            _userGroupMembership = userGroupMembership;
-            _testSuffix = testSuffix;
+            _membership = new MultiDictionary<string, string>();
+            foreach (var pair in userGroupMembership.Split(' '))
+                _membership.Add(Environment.UserDomainName + @"\" + pair.Split('-')[0] + testSuffix, pair.Split('-')[1] + testSuffix);
         }
 
         public string GetClientWorkstation()
@@ -44,20 +44,13 @@ namespace ActiveDirectorySync.Test.Helpers
             throw new NotImplementedException();
         }
 
-        private MultiDictionary<string, string> _membership = null;
 
         public IEnumerable<string> GetIdentityMembership(string username)
         {
-            if (_membership == null)
-            {
-                _membership = new MultiDictionary<string, string>();
-                foreach (var pair in _userGroupMembership.Split(' '))
-                    _membership.Add(Environment.UserDomainName + @"\" + pair.Split('-')[0] + _testSuffix, pair.Split('-')[1] + _testSuffix);
-            }
-            return _membership.Get(username).ToList();
+            return _membership.Get(username);
         }
 
-        public bool IsBuiltInAdministrator(WindowsIdentity userInfo)
+        public bool IsBuiltInAdministrator(WindowsIdentity windowsIdentity)
         {
             throw new NotImplementedException();
         }

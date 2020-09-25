@@ -33,9 +33,10 @@ namespace ActiveDirectorySync.Test.Helpers
 {
     public class MockWindowsSecurityRhetosContainer : RhetosTestContainer
     {
-        public MockWindowsSecurityRhetosContainer(string userGroupMembership, bool commitChanges = false)
+        public MockWindowsSecurityRhetosContainer(string userGroupMembership, bool commitChanges = false, string testSuffix = null)
             : base(commitChanges, GetRhetosServerFolder())
         {
+            TestSuffix = testSuffix ?? "_" + Guid.NewGuid().ToString().Replace("-", "");
             Console.WriteLine($"TestSuffix: {TestSuffix}");
             InitializeSession += builder =>
             {
@@ -58,7 +59,7 @@ namespace ActiveDirectorySync.Test.Helpers
             return Path.Combine(root, @"..\..\Rhetos\Source\Rhetos");
         }
 
-        public readonly string TestSuffix = "_" + Guid.NewGuid().ToString().Replace("-", "");
+        public readonly string TestSuffix;
 
         public readonly string DomainPrefix = Environment.UserDomainName + @"\";
 

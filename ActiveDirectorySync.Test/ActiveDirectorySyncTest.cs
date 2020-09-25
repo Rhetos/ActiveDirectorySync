@@ -382,5 +382,70 @@ namespace ActiveDirectorySync.Test
                 }
             }
         }
+
+        [TestMethod]
+        public void ParallelRequests()
+        {
+            string u1Name = TestName + "U";
+            string r1Name = TestName + "P";
+            string commonTestSuffix = Guid.NewGuid().ToString().Replace("-", "");
+
+            IPrincipal u1;
+            Common.Role r1;
+
+            using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+            {
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                var roles = container.Resolve<GenericRepository<Common.Role>>();
+
+                u1 = container.NewPrincipal(u1Name);
+                principals.Insert(u1);
+
+                r1 = container.NewRole(r1Name);
+                roles.Insert(r1);
+            }
+
+            for (int test = 0; test < 5; test++)
+            {
+                Console.WriteLine("Test: " + test);
+
+                // Test setup: PrincipalHasRole is deleted to make sure it is not up-to-date.
+                // PrincipalHasRole will be recomputed when reading PrincipalHasRole.
+                using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                {
+                    var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                    membership.Delete(membership.Load());
+                    Assert.AreEqual(@"", container.ReportMembership(), "Initial empty membership.");
+                    AuthorizationDataCache.ClearCache();
+                }
+
+                // Recompute membership on authorization with multiple parallel requests:
+                Parallel.For(0, 4, thread =>
+                {
+                    using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                    {
+                        var authorizationProvider = container.Resolve<CommonAuthorizationProvider>();
+                        var userRoles = authorizationProvider.GetUsersRoles(u1);
+                        Assert.AreEqual($@"\{r1Name}", container.ReportRoles(userRoles), "User's roles should be recomputed.");
+                        Assert.AreEqual($@"\{u1Name}-\{r1Name}", container.ReportMembership(), "Updated role membership");
+                    }
+                });
+            }
+        }
+
+        private const string TestName = "ActiveDirectorySyncTest";
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1", commitChanges: true))
+            {
+                var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                var roles = container.Resolve<GenericRepository<Common.Role>>();
+
+                principals.Delete(principals.Load(p => p.Name.Contains(TestName)));
+                roles.Delete(roles.Load(r => r.Name.Contains(TestName)));
+            }
+        }
     }
 }
