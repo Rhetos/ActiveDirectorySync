@@ -1,5 +1,5 @@
 SETLOCAL
-SET Version=0.9.37
+SET Version=0.9.38
 SET Prerelease=auto
 
 REM Updating the build version.
