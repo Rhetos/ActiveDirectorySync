@@ -17,16 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ActiveDirectorySync.Test.Helpers;
+using Autofac;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhetos.Dom.DefaultConcepts;
+using Rhetos.Persistence;
 using Rhetos.TestCommon;
 using Rhetos.Utilities;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ActiveDirectorySync.Test
 {
@@ -428,6 +428,75 @@ namespace ActiveDirectorySync.Test
                         var userRoles = authorizationProvider.GetUsersRoles(u1);
                         Assert.AreEqual($@"\{r1Name}", container.ReportRoles(userRoles), "User's roles should be recomputed.");
                         Assert.AreEqual($@"\{u1Name}-\{r1Name}", container.ReportMembership(), "Updated role membership");
+                    }
+                });
+            }
+        }
+
+        [TestMethod]
+        public void ParallelRequestsTryCreatePrincipal()
+        {
+            string u1Name = TestName + "U";
+            string r1Name = TestName + "P";
+            string commonTestSuffix = Guid.NewGuid().ToString().Replace("-", "");
+
+            IPrincipal u1Prototype;
+            Common.Role r1;
+            RhetosAppOptions rhetosAppOptions;
+
+            using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+            {
+                rhetosAppOptions = container.Resolve<RhetosAppOptions>();
+
+                u1Prototype = container.NewPrincipal(u1Name);
+
+                var roles = container.Resolve<GenericRepository<Common.Role>>();
+                r1 = container.NewRole(r1Name);
+                roles.Insert(r1);
+            }
+
+            rhetosAppOptions.AuthorizationAddUnregisteredPrincipals = true;
+
+            for (int test = 0; test < 5; test++)
+            {
+                Console.WriteLine("Test: " + test);
+
+                // Test setup: PrincipalHasRole is deleted to make sure it is not up-to-date.
+                // PrincipalHasRole will be recomputed when reading PrincipalHasRole.
+                using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                {
+                    var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                    principals.Delete(principals.Load(p => p.Name.Contains(TestName)));
+
+                    var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                    membership.Delete(membership.Load());
+                    Assert.AreEqual(@"", container.ReportMembership(), "Initial empty membership.");
+                    AuthorizationDataCache.ClearCache();
+                }
+
+                // Recompute membership on authorization with multiple parallel requests:
+                Parallel.For(0, 4, thread =>
+                {
+                    using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                    {
+                        try
+                        {
+                            container.InitializeSession += builder => builder.RegisterInstance(rhetosAppOptions).ExternallyOwned();
+
+                            var authorizationData = container.Resolve<IAuthorizationData>();
+                            var authorizationProvider = container.Resolve<CommonAuthorizationProvider>();
+
+                            PrincipalInfo u1 = authorizationData.GetPrincipal(u1Prototype.Name); // First call will automatically create a new principal, see AuthorizationAddUnregisteredPrincipals above.
+                            var userRoles = authorizationProvider.GetUsersRoles(u1);
+                            Assert.AreEqual($@"\{r1Name}", container.ReportRoles(userRoles), "User's roles should be recomputed.");
+                            Assert.AreEqual($@"\{u1Name}-\{r1Name}", container.ReportMembership(), "Updated role membership");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            container.Resolve<IPersistenceTransaction>().DiscardChanges();
+                            throw;
+                        }
                     }
                 });
             }

@@ -48,6 +48,10 @@
     <Reference Include="Rhetos.Dom.DefaultConcepts.Interfaces">
       <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Plugins\Rhetos.Dom.DefaultConcepts.Interfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Rhetos.Persistence.Interfaces, Version=4.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Rhetos.Persistence.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Rhetos.Security.Interfaces">
       <HintPath>..\..\..\Rhetos\Source\Rhetos\bin\Rhetos.Security.Interfaces.dll</HintPath>
     </Reference>
