@@ -17,27 +17,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.ActiveDirectorySync;
-using Rhetos.Utilities;
-using System;
 using System.Collections.Generic;
 
-namespace ActiveDirectorySync.Test.Helpers
+namespace Rhetos.ActiveDirectorySync
 {
-    public class MockWindowsSecurity : IWindowsSecurity
+    /// <summary>
+    /// A utility class for Active directory operations.
+    /// </summary>
+    public interface IWindowsSecurity
     {
-        private readonly MultiDictionary<string, string> _membership;
-
-        public MockWindowsSecurity(string userGroupMembership, string testSuffix)
-        {
-            _membership = new MultiDictionary<string, string>();
-            foreach (var pair in userGroupMembership.Split(' '))
-                _membership.Add(Environment.UserDomainName + @"\" + pair.Split('-')[0] + testSuffix, pair.Split('-')[1] + testSuffix);
-        }
-
-        public IEnumerable<string> GetIdentityMembership(string username)
-        {
-            return _membership.Get(username);
-        }
+        IEnumerable<string> GetIdentityMembership(string username);
     }
 }

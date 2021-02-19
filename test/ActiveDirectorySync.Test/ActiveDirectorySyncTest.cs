@@ -18,15 +18,13 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ActiveDirectorySync.Test.Helpers;
 using Rhetos.Dom.DefaultConcepts;
 using Rhetos.TestCommon;
-using Rhetos.Utilities;
+using Rhetos.ActiveDirectorySync;
+using System.Threading.Tasks;
 
 namespace ActiveDirectorySync.Test
 {
@@ -36,44 +34,44 @@ namespace ActiveDirectorySync.Test
         [TestMethod]
         public void TestMock()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
-                var u1 = container.NewPrincipal("u1");
+                var u1 = scope.NewPrincipal("u1");
                 Console.WriteLine(u1.Name);
 
-                var ws = container.Resolve<Rhetos.Security.IWindowsSecurity>();
-                Assert.AreEqual("r1, r12", TestUtility.DumpSorted(ws.GetIdentityMembership(u1.Name), container.Shorten), "u1 active directory groups");
+                var ws = scope.Resolve<IWindowsSecurity>();
+                Assert.AreEqual("r1, r12", TestUtility.DumpSorted(ws.GetIdentityMembership(u1.Name), scope.Shorten), "u1 active directory groups");
             }
         }
 
         [TestMethod]
         public void ComputeOnInsertPrincipal()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
-                Assert.AreEqual(@"\r1, \r2, r25", container.ReportRoles(roles.Load()), "roles created");
+                Assert.AreEqual(@"\r1, \r2, r25", scope.ReportRoles(roles.Load()), "roles created");
 
                 principals.Insert(u1, u2, u3, u5);
-                Assert.AreEqual(@"\u1, \u2, \u3, u5", container.ReportPrincipals(principals.Load()), "principals created");
+                Assert.AreEqual(@"\u1, \u2, \u3, u5", scope.ReportPrincipals(principals.Load()), "principals created");
 
                 // Recompute membership on insert domain users:
 
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2", container.ReportMembership(), "auto-membership on insert");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2", scope.ReportMembership(), "auto-membership on insert");
 
                 // Inserting non-domain users and roles:
 
@@ -81,71 +79,71 @@ namespace ActiveDirectorySync.Test
                     new Common.PrincipalHasRole { PrincipalID = u2.ID, RoleID = r25.ID },
                     new Common.PrincipalHasRole { PrincipalID = u5.ID, RoleID = r25.ID } },
                     checkUserPermissions: true);
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "non-domain users and roles");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "non-domain users and roles");
             }
         }
 
         [TestMethod]
         public void ComputeOnUpdatePrincipal()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
                 principals.Insert(u1, u2, u3, u5);
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2", container.ReportMembership(), "auto-membership on insert");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2", scope.ReportMembership(), "auto-membership on insert");
 
                 membership.Insert(new[] { // Non-domain users and roles.
                     new Common.PrincipalHasRole { PrincipalID = u2.ID, RoleID = r25.ID },
                     new Common.PrincipalHasRole { PrincipalID = u5.ID, RoleID = r25.ID } });
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "manual membership for non-domain roles and users");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "manual membership for non-domain roles and users");
 
                 // Recompute membership on update principal (domain users only):
 
                 u2 = principals.Load(new[] { u2.ID }).Single(); // Refresh before modification.
-                u2.Name = container.NewName("u2x", domain: false);
+                u2.Name = scope.NewName("u2x", domain: false);
                 principals.Update(u2);
-                Assert.AreEqual(@"\u1-\r1, u2x-\r2, u2x-r25, u5-r25", container.ReportMembership(), "auto-membership on update ignore non-domain users");
-                u2.Name = container.NewName("u2x");
+                Assert.AreEqual(@"\u1-\r1, u2x-\r2, u2x-r25, u5-r25", scope.ReportMembership(), "auto-membership on update ignore non-domain users");
+                u2.Name = scope.NewName("u2x");
                 principals.Update(u2);
-                Assert.AreEqual(@"\u1-\r1, \u2x-r25, u5-r25", container.ReportMembership(), "auto-membership on update domain users");
-                u2.Name = container.NewName("u2");
+                Assert.AreEqual(@"\u1-\r1, \u2x-r25, u5-r25", scope.ReportMembership(), "auto-membership on update domain users");
+                u2.Name = scope.NewName("u2");
                 principals.Update(u2);
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "auto-membership on update domain users 2");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "auto-membership on update domain users 2");
             }
         }
 
         [TestMethod]
         public void CommonFilters()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var repository = container.Resolve<Common.DomRepository>();
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                var repository = scope.Resolve<Common.DomRepository>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
                 var membership = repository.Common.PrincipalHasRole;
 
                 roles.Insert(r1, r2, r25);
@@ -158,12 +156,12 @@ namespace ActiveDirectorySync.Test
 
                 var filter1 = new Common.ActiveDirectoryAllUsersParameter();
                 Assert.AreEqual(@"\u1-\r1, \u2-\r2",
-                    container.ReportMembership(filter1),
+                    scope.ReportMembership(filter1),
                     "filter ActiveDirectoryAllUsersParameter");
 
                 var filter2 = new[] { u1.Name, u2.Name }.Select(name => new Common.ActiveDirectoryUserParameter { UserName = name }).ToArray();
                 Assert.AreEqual(@"\u1-\r1, \u2-\r2",
-                    container.ReportMembership(filter2),
+                    scope.ReportMembership(filter2),
                     "filter ActiveDirectoryUserParameter");
             }
         }
@@ -171,18 +169,18 @@ namespace ActiveDirectorySync.Test
         [TestMethod]
         public void UserShouldNotUpdateDomainMembership()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
 
-                var repository = container.Resolve<Common.DomRepository>();
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                var repository = scope.Resolve<Common.DomRepository>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
                 var membership = repository.Common.PrincipalHasRole;
 
                 roles.Insert(r1, r2);
@@ -190,11 +188,11 @@ namespace ActiveDirectorySync.Test
 
                 // The user should not update domain users/groups membership:
 
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2", container.ReportMembership());
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2", scope.ReportMembership());
 
                 var u2r2 = membership.Query(m => m.Principal.Name.Contains(@"\u2")).Single();
                 membership.Delete(new[] { u2r2 }, checkUserPermissions: false);
-                Assert.AreEqual(@"\u1-\r1", container.ReportMembership());
+                Assert.AreEqual(@"\u1-\r1", scope.ReportMembership());
 
                 var u1r1 = membership.Query(m => m.Principal.Name.Contains(@"\u1")).Single();
                 TestUtility.ShouldFail(
@@ -206,21 +204,21 @@ namespace ActiveDirectorySync.Test
         [TestMethod]
         public void RecomputeMembership()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var repository = container.Resolve<Common.DomRepository>();
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                var repository = scope.Resolve<Common.DomRepository>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
                 var membership = repository.Common.PrincipalHasRole;
 
                 roles.Insert(r1, r2, r25);
@@ -233,31 +231,31 @@ namespace ActiveDirectorySync.Test
 
                 var u1r1 = membership.Query(m => m.Principal.Name.Contains(@"\u1")).Single();
                 membership.Delete(new[] { u1r1 }, checkUserPermissions: false);
-                Assert.AreEqual(@"\u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "modified membership");
+                Assert.AreEqual(@"\u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "modified membership");
 
                 repository.Common.PrincipalHasRole.RecomputeFromActiveDirectoryPrincipalHasRole();
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "recomputed membership");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "recomputed membership");
             }
         }
 
         [TestMethod]
         public void ComputeOnUpdateRole()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
                 principals.Insert(u1, u2, u3, u5);
@@ -267,41 +265,41 @@ namespace ActiveDirectorySync.Test
 
                 // Recompute membership on modified role should remove obsolete memebers:
 
-                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "initial membership");
+                Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "initial membership");
 
-                r2.Name = container.NewName("r2x");
+                r2.Name = scope.NewName("r2x");
                 roles.Update(r2);
-                Assert.AreEqual(@"\u1-\r1, \u2-r25, u5-r25", container.ReportMembership(), "recomputed membership after rename role");
+                Assert.AreEqual(@"\u1-\r1, \u2-r25, u5-r25", scope.ReportMembership(), "recomputed membership after rename role");
 
                 // New role members will not be added automatically, to avoid performance penalty:
                 // (the membership will be added on the principal's authorization check)
 
-                r2.Name = container.NewName("r2");
+                r2.Name = scope.NewName("r2");
                 roles.Update(r2);
                 // This is not reqested feature, this assert simply describes currently implemented behaviour:
-                Assert.AreEqual(@"\u1-\r1, \u2-r25, u5-r25", container.ReportMembership());
+                Assert.AreEqual(@"\u1-\r1, \u2-r25, u5-r25", scope.ReportMembership());
             }
         }
 
         [TestMethod]
         public void RoleInheritance()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2"))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var repository = container.Resolve<Common.DomRepository>();
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                var repository = scope.Resolve<Common.DomRepository>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
                 principals.Insert(u1, u2, u3, u5);
@@ -324,21 +322,21 @@ namespace ActiveDirectorySync.Test
         [TestMethod]
         public void ComputeOnAuthorization()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1 u1-r12 u2-r12 u2-r2", commitChanges: false))
+            using (var scope = TestScope.Create("u1-r1 u1-r12 u2-r12 u2-r2", null))
             {
                 // Insert test data:
 
-                var u1 = container.NewPrincipal("u1");
-                var u2 = container.NewPrincipal("u2");
-                var u3 = container.NewPrincipal("u3");
-                var u5 = container.NewPrincipal("u5", domain: false);
-                var r1 = container.NewRole("r1");
-                var r2 = container.NewRole("r2");
-                var r25 = container.NewRole("r25", domain: false);
+                var u1 = scope.NewPrincipal("u1");
+                var u2 = scope.NewPrincipal("u2");
+                var u3 = scope.NewPrincipal("u3");
+                var u5 = scope.NewPrincipal("u5", domain: false);
+                var r1 = scope.NewRole("r1");
+                var r2 = scope.NewRole("r2");
+                var r25 = scope.NewRole("r25", domain: false);
 
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
 
                 roles.Insert(r1, r2, r25);
                 principals.Insert(u1, u2, u3, u5);
@@ -349,36 +347,36 @@ namespace ActiveDirectorySync.Test
 
                 // Recompute membership on authorization:
 
-                var authorizationProvider = container.Resolve<CommonAuthorizationProvider>();
+                var authorizationProvider = scope.Resolve<CommonAuthorizationProvider>();
 
-                Assert.AreEqual(@"\u2-r25, u5-r25", container.ReportMembership());
+                Assert.AreEqual(@"\u2-r25, u5-r25", scope.ReportMembership());
 
                 {
                     var userRoles = authorizationProvider.GetUsersRoles(u1);
-                    Assert.AreEqual(@"\r1", container.ReportRoles(userRoles));
-                    Assert.AreEqual(@"\u1-\r1, \u2-r25, u5-r25", container.ReportMembership(), "membership recomputed on authorization u1");
+                    Assert.AreEqual(@"\r1", scope.ReportRoles(userRoles));
+                    Assert.AreEqual(@"\u1-\r1, \u2-r25, u5-r25", scope.ReportMembership(), "membership recomputed on authorization u1");
                 }
 
                 {
                     var userRoles = authorizationProvider.GetUsersRoles(u2);
-                    Assert.AreEqual(@"\r2, r25", container.ReportRoles(userRoles), "mixed membership");
-                    Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", container.ReportMembership(), "membership recomputed on authorization u2");
+                    Assert.AreEqual(@"\r2, r25", scope.ReportRoles(userRoles), "mixed membership");
+                    Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "membership recomputed on authorization u2");
                 }
 
                 AuthorizationDataCache.ClearCache();
                 membership.Delete(membership.Load());
-                Assert.AreEqual(@"", container.ReportMembership(), "membership deleted");
+                Assert.AreEqual(@"", scope.ReportMembership(), "membership deleted");
 
                 {
                     var userRoles = authorizationProvider.GetUsersRoles(u1);
-                    Assert.AreEqual(@"\r1", container.ReportRoles(userRoles));
-                    Assert.AreEqual(@"\u1-\r1", container.ReportMembership(), "membership recomputed on authorization u1");
+                    Assert.AreEqual(@"\r1", scope.ReportRoles(userRoles));
+                    Assert.AreEqual(@"\u1-\r1", scope.ReportMembership(), "membership recomputed on authorization u1");
                 }
 
                 {
                     var userRoles = authorizationProvider.GetUsersRoles(u2);
-                    Assert.AreEqual(@"\r2", container.ReportRoles(userRoles));
-                    Assert.AreEqual(@"\u1-\r1, \u2-\r2", container.ReportMembership(), "membership recomputed on authorization u2");
+                    Assert.AreEqual(@"\r2", scope.ReportRoles(userRoles));
+                    Assert.AreEqual(@"\u1-\r1, \u2-\r2", scope.ReportMembership(), "membership recomputed on authorization u2");
                 }
             }
         }
@@ -393,16 +391,18 @@ namespace ActiveDirectorySync.Test
             IPrincipal u1;
             Common.Role r1;
 
-            using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+            using (var scope = TestScope.Create($"{u1Name}-{r1Name}", commonTestSuffix))
             {
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
 
-                u1 = container.NewPrincipal(u1Name);
+                u1 = scope.NewPrincipal(u1Name);
                 principals.Insert(u1);
 
-                r1 = container.NewRole(r1Name);
+                r1 = scope.NewRole(r1Name);
                 roles.Insert(r1);
+
+                scope.CommitOnDispose();
             }
 
             for (int test = 0; test < 5; test++)
@@ -411,23 +411,27 @@ namespace ActiveDirectorySync.Test
 
                 // Test setup: PrincipalHasRole is deleted to make sure it is not up-to-date.
                 // PrincipalHasRole will be recomputed when reading PrincipalHasRole.
-                using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                using (var scope = TestScope.Create($"{u1Name}-{r1Name}", commonTestSuffix))
                 {
-                    var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                    var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
                     membership.Delete(membership.Load());
-                    Assert.AreEqual(@"", container.ReportMembership(), "Initial empty membership.");
+                    Assert.AreEqual(@"", scope.ReportMembership(), "Initial empty membership.");
                     AuthorizationDataCache.ClearCache();
+
+                    scope.CommitOnDispose();
                 }
 
                 // Recompute membership on authorization with multiple parallel requests:
                 Parallel.For(0, 4, thread =>
                 {
-                    using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                    using (var scope = TestScope.Create($"{u1Name}-{r1Name}", commonTestSuffix))
                     {
-                        var authorizationProvider = container.Resolve<CommonAuthorizationProvider>();
+                        var authorizationProvider = scope.Resolve<CommonAuthorizationProvider>();
                         var userRoles = authorizationProvider.GetUsersRoles(u1);
-                        Assert.AreEqual($@"\{r1Name}", container.ReportRoles(userRoles), "User's roles should be recomputed.");
-                        Assert.AreEqual($@"\{u1Name}-\{r1Name}", container.ReportMembership(), "Updated role membership");
+                        Assert.AreEqual($@"\{r1Name}", scope.ReportRoles(userRoles), "User's roles should be recomputed.");
+                        Assert.AreEqual($@"\{u1Name}-\{r1Name}", scope.ReportMembership(), "Updated role membership");
+
+                        scope.CommitOnDispose();
                     }
                 });
             }
@@ -438,13 +442,15 @@ namespace ActiveDirectorySync.Test
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            using (var container = new MockWindowsSecurityRhetosContainer("u1-r1", commitChanges: true))
+            using (var scope = TestScope.Create("u1-r1"))
             {
-                var principals = container.Resolve<GenericRepository<IPrincipal>>();
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
+                var principals = scope.Resolve<GenericRepository<IPrincipal>>();
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
 
                 principals.Delete(principals.Load(p => p.Name.Contains(TestName)));
                 roles.Delete(roles.Load(r => r.Name.Contains(TestName)));
+
+                scope.CommitOnDispose();
             }
         }
     }

@@ -18,50 +18,51 @@
 */
 
 using Autofac;
-using Rhetos.Configuration.Autofac;
+using Rhetos;
+using Rhetos.ActiveDirectorySync;
 using Rhetos.Dom.DefaultConcepts;
-using Rhetos.Security;
 using Rhetos.TestCommon;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ActiveDirectorySync.Test.Helpers
 {
-    public class MockWindowsSecurityRhetosContainer : RhetosTestContainer
+    /// <summary>
+    /// Helper class that manages Dependency Injection container for unit tests.
+    /// The container can be customized for each unit test scope.
+    /// </summary>
+    public class TestScope : UnitOfWorkScope
     {
-        public MockWindowsSecurityRhetosContainer(string userGroupMembership, bool commitChanges = false, string testSuffix = null)
-            : base(commitChanges, GetRhetosServerFolder())
+        /// <summary>
+        /// Creates a thread-safe lifetime scope DI container (service provider)
+        /// to isolate unit of work with a <b>separate database transaction</b>.
+        /// It regsiters the <see cref="MockWindowsSecurity"/> as <see cref="IWindowsSecurity"/>
+        /// class with the provided user group memebership.
+        /// It registers the CommonAuthorizationProvider to test it even if another security package was deployed.
+        /// </summary>
+        public static TestScope Create(string userGroupMembership, string testSuffix = null, Action<ContainerBuilder> registerCustomComponents = null)
         {
-            TestSuffix = testSuffix ?? "_" + Guid.NewGuid().ToString().Replace("-", "");
-            Console.WriteLine($"TestSuffix: {TestSuffix}");
-            InitializeSession += builder =>
+            testSuffix = testSuffix ?? "_" + Guid.NewGuid().ToString().Replace("-", "");
+            Console.WriteLine($"TestSuffix: {testSuffix}");
+            return new TestScope(RhetosHost.GetRootContainer(), builder =>
             {
-                builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership, TestSuffix)).As<IWindowsSecurity>();
-                // Test the CommonAuthorizationProvider even if another security package was deployed:
+                builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership, testSuffix)).As<IWindowsSecurity>();
                 builder.RegisterType<CommonAuthorizationProvider>();
-            };
-        }
+                registerCustomComponents?.Invoke(builder);
 
-        private static string GetRhetosServerFolder()
-        {
-            string start = Directory.GetCurrentDirectory();
-            string root = start;
-            while (Path.GetFileName(root) != "ActiveDirectorySync")
-            {
-                root = Path.GetDirectoryName(root);
-                if (root == null)
-                    throw new ApplicationException($"Cannot find the root 'ActiveDirectorySync' source folder starting from '{start}'.");
-            }
-            return Path.Combine(root, @"..\..\Rhetos\Source\Rhetos");
+            }, testSuffix);
         }
 
         public readonly string TestSuffix;
 
         public readonly string DomainPrefix = Environment.UserDomainName + @"\";
+
+        public TestScope(IContainer container, Action<ContainerBuilder> registerCustomComponents, string testSuffix) : base(container, registerCustomComponents)
+        {
+            TestSuffix = testSuffix;
+        }
 
         /// <summary>
         /// Creates a new principal with the current windows domain prefix (by default) and a random test context suffix.
@@ -155,5 +156,11 @@ namespace ActiveDirectorySync.Test.Helpers
             var roleNames = this.Resolve<GenericRepository<Common.Role>>().Load().ToDictionary(r => r.ID, r => r.Name);
             return ReportRoles(roles.Select(id => roleNames[id]));
         }
+
+        /// <summary>
+        /// Reusing a single shared static DI container between tests, to reduce initialization time for each test.
+        /// Each test should create a child scope with <see cref="TestScope.Create(string, string, Action{ContainerBuilder})"/> methods to start a 'using' block.
+        /// </summary>
+        private static readonly RhetosHost RhetosHost = RhetosHost.FindBuilder(Path.GetFullPath(@"..\..\..\..\..\test\Rhetos.ActiveDirectorySync.TestApp\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.TestApp.dll")).Build();
     }
 }
