@@ -17,20 +17,13 @@
     <None Update="rhetos-app.local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="rhetos-app.settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
-  <Target Name="CopyDslScripts"  BeforeTargets="ResolveRhetosBuildItems">
+  <Target Name="CopyDslScripts" BeforeTargets="ResolveRhetosBuildItems">
     <ItemGroup>
       <AsctiveDirectorySyncDslScripts Include="..\..\src\DslScripts\**\*" />
     </ItemGroup>
-    <Copy
-        SourceFiles="@(AsctiveDirectorySyncDslScripts)"
-        DestinationFolder="DslScripts\ActiveDirectorySync"
-        SkipUnchangedFiles="true"
-        />
+    <Copy SourceFiles="@(AsctiveDirectorySyncDslScripts)" DestinationFolder="DslScripts\ActiveDirectorySync" SkipUnchangedFiles="true" />
   </Target>  
   
 </Project>

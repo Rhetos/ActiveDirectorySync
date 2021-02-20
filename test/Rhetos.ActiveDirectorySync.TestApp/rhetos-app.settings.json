@@ -1,8 +1,0 @@
-﻿{
-  "Rhetos": {
-    "App": {
-      "RhetosRuntimePath": "Rhetos.ActiveDirectorySync.TestApp.dll",
-      "AssetsFolder": "RhetosAssets"
-    }
-  }
-}

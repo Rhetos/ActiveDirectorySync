@@ -46,7 +46,7 @@ namespace ActiveDirectorySync.Test.Helpers
         {
             testSuffix = testSuffix ?? "_" + Guid.NewGuid().ToString().Replace("-", "");
             Console.WriteLine($"TestSuffix: {testSuffix}");
-            return new TestScope(RhetosHost.GetRootContainer(), builder =>
+            return new TestScope(_rhetosHost.GetRootContainer(), builder =>
             {
                 builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership, testSuffix)).As<IWindowsSecurity>();
                 builder.RegisterType<CommonAuthorizationProvider>();
@@ -161,6 +161,6 @@ namespace ActiveDirectorySync.Test.Helpers
         /// Reusing a single shared static DI container between tests, to reduce initialization time for each test.
         /// Each test should create a child scope with <see cref="TestScope.Create(string, string, Action{ContainerBuilder})"/> methods to start a 'using' block.
         /// </summary>
-        private static readonly RhetosHost RhetosHost = RhetosHost.FindBuilder(Path.GetFullPath(@"..\..\..\..\..\test\Rhetos.ActiveDirectorySync.TestApp\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.TestApp.dll")).Build();
+        private static readonly RhetosHost _rhetosHost = RhetosHost.FindBuilder(Path.GetFullPath(@"..\..\..\..\..\test\Rhetos.ActiveDirectorySync.TestApp\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.TestApp.dll")).Build();
     }
 }

@@ -36,10 +36,9 @@ namespace Rhetos.ActiveDirectorySync.TestApp
         public static IRhetosHostBuilder CreateRhetosHostBuilder()
         {
             return new RhetosHostBuilder()
-                .ConfigureConfiguration(builder =>
-                {
-                    builder.AddJsonFile(RhetosAppEnvironment.LocalConfigurationFileName);
-                })
+                .ConfigureRhetosHostDefaults()
+                .ConfigureConfiguration(builder => builder
+                    .AddJsonFile("rhetos-app.local.settings.json"))
                 .ConfigureContainer(builder =>
                 {
                     builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
