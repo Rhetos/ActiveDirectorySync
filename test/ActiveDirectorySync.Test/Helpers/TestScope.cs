@@ -38,8 +38,8 @@ namespace ActiveDirectorySync.Test.Helpers
         /// <summary>
         /// Creates a thread-safe lifetime scope DI container (service provider)
         /// to isolate unit of work with a <b>separate database transaction</b>.
-        /// It regsiters the <see cref="MockWindowsSecurity"/> as <see cref="IWindowsSecurity"/>
-        /// class with the provided user group memebership.
+        /// It registers the <see cref="MockWindowsSecurity"/> as <see cref="IWindowsSecurity"/>
+        /// class with the provided user group membership.
         /// It registers the CommonAuthorizationProvider to test it even if another security package was deployed.
         /// </summary>
         public static TestScope Create(string userGroupMembership, string testSuffix = null, Action<ContainerBuilder> registerCustomComponents = null)
