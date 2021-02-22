@@ -17,14 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Security;
+using Rhetos.ActiveDirectorySync;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ActiveDirectorySync.Test.Helpers
 {
@@ -39,20 +35,9 @@ namespace ActiveDirectorySync.Test.Helpers
                 _membership.Add(Environment.UserDomainName + @"\" + pair.Split('-')[0] + testSuffix, pair.Split('-')[1] + testSuffix);
         }
 
-        public string GetClientWorkstation()
-        {
-            throw new NotImplementedException();
-        }
-
-
         public IEnumerable<string> GetIdentityMembership(string username)
         {
             return _membership.Get(username);
-        }
-
-        public bool IsBuiltInAdministrator(WindowsIdentity windowsIdentity)
-        {
-            throw new NotImplementedException();
         }
     }
 }
