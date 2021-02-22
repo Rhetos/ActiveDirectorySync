@@ -25,8 +25,10 @@ using Rhetos.Dom.DefaultConcepts;
 using Rhetos.TestCommon;
 using Rhetos.ActiveDirectorySync;
 using System.Threading.Tasks;
+using Rhetos.Utilities;
+using Autofac;
 
-namespace ActiveDirectorySync.Test
+namespace Rhetos.ActiveDirectorySync.Test
 {
     [TestClass]
     public class ActiveDirectorySyncTest
@@ -402,7 +404,7 @@ namespace ActiveDirectorySync.Test
                 r1 = scope.NewRole(r1Name);
                 roles.Insert(r1);
 
-                scope.CommitOnDispose();
+                scope.CommitAndClose();
             }
 
             for (int test = 0; test < 5; test++)
@@ -418,7 +420,7 @@ namespace ActiveDirectorySync.Test
                     Assert.AreEqual(@"", scope.ReportMembership(), "Initial empty membership.");
                     AuthorizationDataCache.ClearCache();
 
-                    scope.CommitOnDispose();
+                    scope.CommitAndClose();
                 }
 
                 // Recompute membership on authorization with multiple parallel requests:
@@ -431,7 +433,7 @@ namespace ActiveDirectorySync.Test
                         Assert.AreEqual($@"\{r1Name}", scope.ReportRoles(userRoles), "User's roles should be recomputed.");
                         Assert.AreEqual($@"\{u1Name}-\{r1Name}", scope.ReportMembership(), "Updated role membership");
 
-                        scope.CommitOnDispose();
+                        scope.CommitAndClose();
                     }
                 });
             }
@@ -448,15 +450,17 @@ namespace ActiveDirectorySync.Test
             Common.Role r1;
             RhetosAppOptions rhetosAppOptions;
 
-            using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+            using (var scope = TestScope.Create($"{u1Name}-{r1Name}", commonTestSuffix))
             {
-                rhetosAppOptions = container.Resolve<RhetosAppOptions>();
+                rhetosAppOptions = scope.Resolve<RhetosAppOptions>();
 
-                u1Prototype = container.NewPrincipal(u1Name);
+                u1Prototype = scope.NewPrincipal(u1Name);
 
-                var roles = container.Resolve<GenericRepository<Common.Role>>();
-                r1 = container.NewRole(r1Name);
+                var roles = scope.Resolve<GenericRepository<Common.Role>>();
+                r1 = scope.NewRole(r1Name);
                 roles.Insert(r1);
+
+                scope.CommitAndClose();
             }
 
             rhetosAppOptions.AuthorizationAddUnregisteredPrincipals = true;
@@ -467,40 +471,34 @@ namespace ActiveDirectorySync.Test
 
                 // Test setup: PrincipalHasRole is deleted to make sure it is not up-to-date.
                 // PrincipalHasRole will be recomputed when reading PrincipalHasRole.
-                using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                using (var scope = TestScope.Create($"{u1Name}-{r1Name}", commonTestSuffix))
                 {
-                    var principals = container.Resolve<GenericRepository<IPrincipal>>();
+                    var principals = scope.Resolve<GenericRepository<IPrincipal>>();
                     principals.Delete(principals.Load(p => p.Name.Contains(TestName)));
 
-                    var membership = container.Resolve<GenericRepository<Common.PrincipalHasRole>>();
+                    var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
                     membership.Delete(membership.Load());
-                    Assert.AreEqual(@"", container.ReportMembership(), "Initial empty membership.");
+                    Assert.AreEqual(@"", scope.ReportMembership(), "Initial empty membership.");
                     AuthorizationDataCache.ClearCache();
+
+                    scope.CommitAndClose();
                 }
 
                 // Recompute membership on authorization with multiple parallel requests:
                 Parallel.For(0, 4, thread =>
                 {
-                    using (var container = new MockWindowsSecurityRhetosContainer($"{u1Name}-{r1Name}", commitChanges: true, commonTestSuffix))
+                    using (var scope = TestScope.Create($"{u1Name}-{r1Name}", commonTestSuffix,
+                        builder => builder.RegisterInstance(rhetosAppOptions).ExternallyOwned()))
                     {
-                        try
-                        {
-                            container.InitializeSession += builder => builder.RegisterInstance(rhetosAppOptions).ExternallyOwned();
+                        var authorizationData = scope.Resolve<IAuthorizationData>();
+                        var authorizationProvider = scope.Resolve<CommonAuthorizationProvider>();
 
-                            var authorizationData = container.Resolve<IAuthorizationData>();
-                            var authorizationProvider = container.Resolve<CommonAuthorizationProvider>();
+                        PrincipalInfo u1 = authorizationData.GetPrincipal(u1Prototype.Name); // First call will automatically create a new principal, see AuthorizationAddUnregisteredPrincipals above.
+                        var userRoles = authorizationProvider.GetUsersRoles(u1);
+                        Assert.AreEqual($@"\{r1Name}", scope.ReportRoles(userRoles), "User's roles should be recomputed.");
+                        Assert.AreEqual($@"\{u1Name}-\{r1Name}", scope.ReportMembership(), "Updated role membership");
 
-                            PrincipalInfo u1 = authorizationData.GetPrincipal(u1Prototype.Name); // First call will automatically create a new principal, see AuthorizationAddUnregisteredPrincipals above.
-                            var userRoles = authorizationProvider.GetUsersRoles(u1);
-                            Assert.AreEqual($@"\{r1Name}", container.ReportRoles(userRoles), "User's roles should be recomputed.");
-                            Assert.AreEqual($@"\{u1Name}-\{r1Name}", container.ReportMembership(), "Updated role membership");
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            container.Resolve<IPersistenceTransaction>().DiscardChanges();
-                            throw;
-                        }
+                        scope.CommitAndClose();
                     }
                 });
             }
@@ -519,7 +517,7 @@ namespace ActiveDirectorySync.Test
                 principals.Delete(principals.Load(p => p.Name.Contains(TestName)));
                 roles.Delete(roles.Load(r => r.Name.Contains(TestName)));
 
-                scope.CommitOnDispose();
+                scope.CommitAndClose();
             }
         }
     }
