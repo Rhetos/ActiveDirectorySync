@@ -20,10 +20,9 @@
 using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ActiveDirectorySync.Test.Helpers;
+using Rhetos.ActiveDirectorySync.Test.Helpers;
 using Rhetos.Dom.DefaultConcepts;
 using Rhetos.TestCommon;
-using Rhetos.ActiveDirectorySync;
 using System.Threading.Tasks;
 using Rhetos.Utilities;
 using Autofac;

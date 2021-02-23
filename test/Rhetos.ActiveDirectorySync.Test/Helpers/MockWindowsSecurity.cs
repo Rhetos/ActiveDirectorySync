@@ -22,7 +22,7 @@ using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 
-namespace ActiveDirectorySync.Test.Helpers
+namespace Rhetos.ActiveDirectorySync.Test.Helpers
 {
     public class MockWindowsSecurity : IWindowsSecurity
     {

@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ActiveDirectorySync.Test.Helpers
+namespace Rhetos.ActiveDirectorySync.Test.Helpers
 {
     /// <summary>
     /// Helper class that manages Dependency Injection container for unit tests.
