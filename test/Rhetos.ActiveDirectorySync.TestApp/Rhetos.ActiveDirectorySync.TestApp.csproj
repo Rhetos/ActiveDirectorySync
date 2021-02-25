@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Rhetos.MSBuild" Version="5.0.0-dev*" />
+    <PackageReference Include="Rhetos.Host" Version="5.0.0-dev*" />
   </ItemGroup>
 
   <ItemGroup>
