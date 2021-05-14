@@ -18,7 +18,8 @@
 */
 
 using Autofac;
-using Rhetos.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rhetos.Security;
 using Rhetos.Utilities;
 
@@ -30,20 +31,26 @@ namespace Rhetos.ActiveDirectorySync.TestApp
         {
         }
 
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureServices(ConfigureRhetos);
+
         /// <summary>
         /// Provides basic runtime infrastructure for Rhetos framework: configuration settings and system components registration.
         /// </summary>
-        public static IRhetosHostBuilder CreateRhetosHostBuilder()
+        private static void ConfigureRhetos(HostBuilderContext hostContext, IServiceCollection services)
         {
-            return new RhetosHostBuilder()
-                .ConfigureRhetosHostDefaults()
-                .ConfigureConfiguration(builder => builder
-                    .AddJsonFile("rhetos-app.local.settings.json"))
-                .ConfigureContainer(builder =>
-                {
-                    builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
-                    builder.RegisterType<ConsoleLogProvider>().As<ILogProvider>();
-                });
+            services.AddRhetosHost((serviceProvider, rhetosHostBuilder) =>
+            {
+                rhetosHostBuilder.ConfigureRhetosAppDefaults()
+                    .ConfigureConfiguration(configurationBuilder => configurationBuilder
+                        .AddJsonFile("rhetos-app.local.settings.json")
+                    )
+                    .ConfigureContainer(rhetosContainerBuilder =>
+                    {
+                        rhetosContainerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
+                    });
+            });
         }
     }
 }
