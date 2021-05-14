@@ -44,15 +44,19 @@ namespace Rhetos.ActiveDirectorySync.Test.Helpers
         /// </summary>
         public static TestScope Create(string userGroupMembership, string testSuffix = null, Action<ContainerBuilder> registerCustomComponents = null)
         {
-            testSuffix = testSuffix ?? "_" + Guid.NewGuid().ToString().Replace("-", "");
+            testSuffix ??= "_" + Guid.NewGuid().ToString().Replace("-", "");
             Console.WriteLine($"TestSuffix: {testSuffix}");
-            return new TestScope(_rhetosHost.GetRootContainer(), builder =>
-            {
-                builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership, testSuffix)).As<IWindowsSecurity>();
-                builder.RegisterType<CommonAuthorizationProvider>();
-                registerCustomComponents?.Invoke(builder);
 
-            }, testSuffix);
+            return new TestScope(
+                _rhetosHost.GetRootContainer(),
+                builder =>
+                {
+                    builder.RegisterInstance(new MockWindowsSecurity(userGroupMembership, testSuffix)).As<IWindowsSecurity>();
+                    builder.RegisterType<CommonAuthorizationProvider>();
+                    registerCustomComponents?.Invoke(builder);
+
+                },
+                testSuffix);
         }
 
         public readonly string TestSuffix;

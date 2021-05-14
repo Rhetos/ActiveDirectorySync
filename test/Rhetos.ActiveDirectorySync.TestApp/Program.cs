@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rhetos.Security;
 using Rhetos.Utilities;
+using System;
 
 namespace Rhetos.ActiveDirectorySync.TestApp
 {
@@ -29,6 +30,7 @@ namespace Rhetos.ActiveDirectorySync.TestApp
     {
         public static void Main()
         {
+            Console.WriteLine("This is a placeholder application for unit testing. Its features are executed by unit tests.");
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -46,9 +48,9 @@ namespace Rhetos.ActiveDirectorySync.TestApp
                     .ConfigureConfiguration(configurationBuilder => configurationBuilder
                         .AddJsonFile("rhetos-app.local.settings.json")
                     )
-                    .ConfigureContainer(rhetosContainerBuilder =>
+                    .ConfigureContainer(containerBuilder =>
                     {
-                        rhetosContainerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
+                        containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
                     });
             });
         }
