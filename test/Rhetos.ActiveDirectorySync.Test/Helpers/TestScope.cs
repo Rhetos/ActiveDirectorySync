@@ -165,6 +165,6 @@ namespace Rhetos.ActiveDirectorySync.Test.Helpers
         /// Reusing a single shared static DI container between tests, to reduce initialization time for each test.
         /// Each test should create a child scope with <see cref="TestScope.Create(string, string, Action{ContainerBuilder})"/> methods to start a 'using' block.
         /// </summary>
-        private static readonly RhetosHost _rhetosHost = RhetosHost.Find(Path.GetFullPath(@"..\..\..\..\..\test\Rhetos.ActiveDirectorySync.TestApp\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.TestApp.dll"));
+        private static readonly RhetosHost _rhetosHost = RhetosHost.CreateFrom(Path.GetFullPath(@"..\..\..\..\..\test\Rhetos.ActiveDirectorySync.TestApp\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.TestApp.dll"));
     }
 }
