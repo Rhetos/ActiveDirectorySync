@@ -23,9 +23,9 @@
 
   <Target Name="CopyDslScripts" BeforeTargets="ResolveRhetosBuildItems">
     <ItemGroup>
-      <AsctiveDirectorySyncDslScripts Include="..\..\src\DslScripts\**\*" />
+      <ActiveDirectorySyncDslScripts Include="..\..\src\DslScripts\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(AsctiveDirectorySyncDslScripts)" DestinationFolder="DslScripts\ActiveDirectorySync" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ActiveDirectorySyncDslScripts)" DestinationFolder="DslScripts\ActiveDirectorySync" SkipUnchangedFiles="true" />
   </Target>  
   
 </Project>
