@@ -1,5 +1,9 @@
 # ActiveDirectorySync release notes
 
+## 5.0.0 (TO BE RELEASED)
+
+* Migrated from .NET Framework to .NET 5 and Rhetos 5.
+
 ## 2.0.0 (2020-09-25)
 
 * Bugfix: SqlException "Cannot insert duplicate key row in object 'Common.PrincipalHasRole' with unique index 'IX_PrincipalHasRole_Principal_Role'." on multiple web requests.
