@@ -5,7 +5,7 @@
     <version>5.1.0-dev</version>
     <authors>Omega software</authors>
     <owners>Omega software</owners>
-    <licenseUrl>http://opensource.org/licenses/AGPL-3.0</licenseUrl>
+    <license type="expression">AGPL-3.0-only</license>
     <projectUrl>https://github.com/rhetos/rhetos</projectUrl>
     <description>ActiveDirectorySync is a package for Rhetos development platform.
       It synchronizes the Rhetos principals and roles with Active Directory by automatically adding or removing principal-role and role-role membership relations.</description>
