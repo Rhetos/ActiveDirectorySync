@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright (C) 2014 Omega software d.o.o.
 
     This file is part of Rhetos.
@@ -364,7 +364,7 @@ namespace Rhetos.ActiveDirectorySync.Test
                     Assert.AreEqual(@"\u1-\r1, \u2-\r2, \u2-r25, u5-r25", scope.ReportMembership(), "membership recomputed on authorization u2");
                 }
 
-                AuthorizationDataCache.ClearCache();
+                AuthorizationDataCache.ClearCacheAll();
                 membership.Delete(membership.Load());
                 Assert.AreEqual(@"", scope.ReportMembership(), "membership deleted");
 
@@ -417,7 +417,7 @@ namespace Rhetos.ActiveDirectorySync.Test
                     var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
                     membership.Delete(membership.Load());
                     Assert.AreEqual(@"", scope.ReportMembership(), "Initial empty membership.");
-                    AuthorizationDataCache.ClearCache();
+                    AuthorizationDataCache.ClearCacheAll();
 
                     scope.CommitAndClose();
                 }
@@ -478,7 +478,7 @@ namespace Rhetos.ActiveDirectorySync.Test
                     var membership = scope.Resolve<GenericRepository<Common.PrincipalHasRole>>();
                     membership.Delete(membership.Load());
                     Assert.AreEqual(@"", scope.ReportMembership(), "Initial empty membership.");
-                    AuthorizationDataCache.ClearCache();
+                    AuthorizationDataCache.ClearCacheAll();
 
                     scope.CommitAndClose();
                 }

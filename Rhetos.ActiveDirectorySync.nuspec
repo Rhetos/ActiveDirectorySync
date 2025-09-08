@@ -9,18 +9,21 @@
     <projectUrl>https://github.com/rhetos/rhetos</projectUrl>
     <description>ActiveDirectorySync is a package for Rhetos development platform.
       It synchronizes the Rhetos principals and roles with Active Directory by automatically adding or removing principal-role and role-role membership relations.</description>
+    <readme>docs\Readme.md</readme>
     <copyright>Copyright Omega software 2015</copyright>
     <tags>Rhetos plugin</tags>
     <dependencies>
-      <dependency id="Rhetos.CommonConcepts" version="5.0.0" />
-      <dependency id="System.DirectoryServices" version="5.0.0" />
+      <group targetFramework="net8.0">
+        <dependency id="Rhetos.CommonConcepts" version="6.0.0" />
+        <dependency id="System.DirectoryServices" version="8.0.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Readme.md" target="" />
+    <file src="Readme.md" target="docs" />
     <file src="src\DslScripts\**\*" target="DslScripts" />
     <file src="ChangeLog.md" target="" />
-    <file src="src\Rhetos.ActiveDirectorySync\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.dll" target="lib\net5.0" />
-    <file src="src\Rhetos.ActiveDirectorySync\bin\Debug\net5.0\Rhetos.ActiveDirectorySync.pdb" target="lib\net5.0" />
+    <file src="src\Rhetos.ActiveDirectorySync\bin\Debug\net8.0\Rhetos.ActiveDirectorySync.dll" target="lib\net8.0" />
+    <file src="src\Rhetos.ActiveDirectorySync\bin\Debug\net8.0\Rhetos.ActiveDirectorySync.pdb" target="lib\net8.0" />
   </files>
 </package>
